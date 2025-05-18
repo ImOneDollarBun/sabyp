@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-
+from fastapi.responses import FileResponse
 from src.database.db_crud import update_user, get_user_projects
 from src.utils.proceed_data import get_current_user
 from .schemas import User
@@ -8,13 +8,18 @@ api_router_api = APIRouter()
 
 
 @api_router_api.get("/api/me")
-def get_my_profile(user: User = Depends(get_current_user)):
+async def get_my_profile(user: User = Depends(get_current_user)):
     projects = get_user_projects(user.id)
     return {
         "email": user.email,
         "username": user.username,
         "projects": projects
     }
+
+
+@api_router_api.get('/favicon.ico')
+async def favicon():
+    return FileResponse('favicon.ico')
 
 
 @api_router_api.put('/api/me')
