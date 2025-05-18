@@ -21,6 +21,7 @@ async def get_my_profile(user: User = Depends(get_current_user)):
 async def favicon():
     return FileResponse('favicon.ico')
 
+
 @api_router_api.put('/api/me')
 async def put_account(new_data: User, user=Depends(get_current_user)):
     if user:
