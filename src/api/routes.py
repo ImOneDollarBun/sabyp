@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, Cookie
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 
 from src.database.db_crud import create_user, get_user, get_logins
 from src.utils.crypt import PSW2HASH
@@ -11,6 +11,11 @@ router = APIRouter()
 
 
 #Логика
+@router.head('/')
+async def hed():
+    return JSONResponse({'status': 'ok'})
+
+
 @router.post('/register')
 async def signup(reg_form: User = Depends(hash_password_dependency)):
     try:
