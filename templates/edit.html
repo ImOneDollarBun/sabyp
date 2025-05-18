@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <link rel="stylesheet" href="/static/style/edit.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Редактирование проекта</title>
+</head>
+
+<body>
+  <header>
+    <h1 id="projectTitle">Редактирование проекта</h1>
+    <div class="header-buttons">
+      <button class="cancel-btn" onclick="window.history.back()">Отмена</button>
+      <button class="save-btn" id="saveBtn">Сохранить</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="section">
+      <h2>Название проекта</h2>
+      <input type="text" id="projectTitleInput" placeholder="Введите название проекта"
+        style="width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid #ccc;box-sizing:border-box;">
+    </div>
+    <div class="section">
+      <h2>Обложка проекта</h2>
+      <div class="cover-upload">
+        <div class="image-box">
+          <img id="coverPreview" src="/static/default-cover.jpg" alt="Обложка">
+          <label class="upload-label">
+            Загрузить
+            <input type="file" id="coverInput" accept="image/*">
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <h2>Дополнительные изображения</h2>
+      <div class="image-uploads" id="extraImages"></div>
+      <button class="add-block-btn" id="addImgBtn">+ Добавить изображение</button>
+    </div>
+    <div class="section">
+      <h2>Описание проекта</h2>
+      <textarea id="description" placeholder="Расскажите о проекте..."></textarea>
+    </div>
+    <div class="section">
+      <h2>Дополнительные блоки</h2>
+      <div id="customBlocks"></div>
+      <button class="add-block-btn" id="addBlockBtn">+ Добавить блок</button>
+    </div>
+  </div>
+
+  <script>
+    const state = { cover: '', images: {}, description: '', blocks: [], name: '' };
+    const projectId = window.location.pathname.split('/')[2];
+
+    function previewImage(file, previewEl) {
+      const reader = new FileReader();
+      reader.onload = () => previewEl.src = reader.result;
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById('coverInput').addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      state.cover = f;
+      previewImage(f, document.getElementById('coverPreview'));
+    });
+
+    document.getElementById('projectTitleInput').addEventListener('input', e => {
+      state.name = e.target.value;
+    });
+
+    function createImageBox(key) {
+      const box = document.createElement('div');
+      box.className = 'image-box';
+      box.innerHTML = `
+    <img alt="Доп. изображение">
+    <label class="upload-label">Загрузить<input type="file" accept="image/*"></label>
+    <button class="delete-block" title="Удалить">×</button>
+  `;
+      const img = box.querySelector('img');
+      const input = box.querySelector('input');
+
+      const value = state.images[key];
+      if (typeof value === 'string') {
+        img.src = value;
+      }
+
+      input.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        state.images[key] = file;
+        previewImage(file, img);
+      });
+
+      box.querySelector('.delete-block').addEventListener('click', () => {
+        delete state.images[key];
+        box.remove();
+        refreshImages();
+      });
+
+
+      console.log('key:', key, 'value:', value);
+      return box;
+    }
+
+    function refreshImages() {
+      const cont = document.getElementById('extraImages');
+      cont.innerHTML = '';
+      for (const key in state.images) {
+        cont.appendChild(createImageBox(key));
+      }
+    }
+
+    let imgCounter = 0;
+
+    document.getElementById('addImgBtn').addEventListener('click', () => {
+      const key = 'img_' + imgCounter++;
+      if (!state.images.hasOwnProperty(key)) {
+        state.images[key] = null;
+        refreshImages();
+      }
+    });
+
+
+    function addCustomBlock(content = '') {
+      const idx = state.blocks.length;
+      state.blocks.push(content);
+
+      const div = document.createElement('div');
+      div.className = 'dynamic-block';
+      div.innerHTML = `
+    <textarea placeholder="Содержимое блока" style="height:100px;width:90%">${content}</textarea>
+    <button class="delete-block">×</button>
+  `;
+      const ta = div.querySelector('textarea');
+      ta.addEventListener('input', e => state.blocks[idx] = e.target.value);
+
+      div.querySelector('button').addEventListener('click', () => {
+        state.blocks.splice(idx, 1);
+        div.remove();
+      });
+
+      document.getElementById('customBlocks').appendChild(div);
+    }
+
+    document.getElementById('addBlockBtn').addEventListener('click', () => addCustomBlock());
+
+    document.getElementById('description').addEventListener('input', e => {
+      state.description = e.target.value;
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const form = new FormData();
+      if (state.cover instanceof File) {
+        form.append('cover', state.cover);
+      }
+
+      const imagesMeta = {};
+      Object.entries(state.images).forEach(([key, val]) => {
+        if (val instanceof File) {
+          form.append(key, val);
+          imagesMeta[key] = val.name; // чтобы на бэке обновили путь
+        } else if (typeof val === 'string') {
+          imagesMeta[key] = val.replace('/media/', '');
+        }
+      });
+      form.append('images', JSON.stringify(imagesMeta));
+
+      form.append('title', state.name);
+      form.append('description', state.description);
+      form.append('blocks', JSON.stringify(state.blocks));
+
+      try {
+        const resp = await fetch(`/api/projects/${projectId}`, {
+          method: 'PUT',
+          body: form
+        });
+
+        if (resp.ok) {
+          alert('Сохранено');
+          location.href = `/projects/${projectId}`;
+        } else {
+          const text = await resp.text();
+          alert('Ошибка сохранения: ' + text);
+          console.error('Ошибка ответа сервера:', text);
+        }
+      } catch (e) {
+        alert('Ошибка отправки запроса');
+        console.error(e);
+      }
+    });
+
+    (async () => {
+      const r = await fetch(`/api/projects/${projectId}`);
+      if (!r.ok) return;
+      const data = await r.json();
+      console.log(data.images);
+
+      document.getElementById('projectTitle').textContent = 'Редактирование проекта: ' + data.title;
+      document.getElementById('projectTitleInput').value = data.title;
+      state.name = data.title;
+
+      document.getElementById('description').value = data.description;
+      state.description = data.description;
+
+      if (data.cover) {
+        document.getElementById('coverPreview').src = data.cover;
+        state.cover = data.cover;
+
+      }
+
+      if (data.images && typeof data.images === 'object') {
+        for (const [key, val] of Object.entries(data.images)) {
+          state.images[key] = val;
+        }
+        refreshImages();
+      }
+
+      if (Array.isArray(data.blocks)) {
+        data.blocks.forEach(b => addCustomBlock(b));
+      }
+    })();
+  </script>
+
+</body>
+
+</html>

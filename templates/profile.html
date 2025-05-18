@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <link rel="stylesheet" href="static/style/profile.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Личный кабинет</title>
+</head>
+
+<body>
+  <header>
+    <h1>Личный кабинет</h1>
+  </header>
+  <div class="container">
+    <div class="grid">
+      <!-- Карточка с учётными данными пользователя -->
+      <div class="card">
+        <h2>Учётные данные</h2>
+        <label>Email<input type="email" id="email"></label>
+        <label>Username<input type="text" id="username"></label>
+        <label>Новый пароль<input type="password" id="password"></label>
+        <button class="save-btn" id="saveUser">Сохранить</button>
+      </div>
+
+      <!-- Карточка с проектами -->
+      <div class="card">
+        <h2 id="projectsHeader">Мои проекты (0/5)</h2>
+        <div class="project-list" id="projectList"></div>
+        <button class="add-btn" id="addProject">+ Создать проект</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const maxProjects = 5;
+
+    async function loadProfile() {
+      try {
+        const r = await fetch('/api/me');
+        if (!r.ok) throw new Error('Failed to fetch profile');
+        const d = await r.json();
+        email.value = d.email;
+        username.value = d.username;
+        renderProjects(d.projects || []);
+      } catch (e) {
+        console.error('Ошибка загрузки профиля:', e);
+      }
+    }
+
+
+    function renderProjects(projects) {
+      const header = document.getElementById('projectsHeader');
+      if (header) {
+        header.textContent = `Мои проекты (${projects.length}/${maxProjects})`;
+      }
+
+      const cont = document.getElementById('projectList');
+      cont.innerHTML = '';
+
+      if (projects.length === 0) {
+        cont.innerHTML = '<p>У вас нет проектов.</p>';
+        return;
+      }
+
+      projects.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'project-card';
+
+        const actions = document.createElement('div');
+        actions.className = 'project-actions';
+
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'share-btn';
+        shareBtn.title = 'Поделиться';
+        shareBtn.textContent = '🔗';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.title = 'Удалить';
+        deleteBtn.textContent = '❌';
+
+        actions.appendChild(shareBtn);
+        actions.appendChild(deleteBtn);
+
+        const content = document.createElement('div');
+        content.className = 'project-content';
+
+        const title = document.createElement('h3');
+        title.textContent = p.title || 'Без названия';
+
+        const desc = document.createElement('p');
+        desc.className = 'description';
+        desc.textContent = p.description || '';
+
+        content.appendChild(title);
+        content.appendChild(desc);
+
+        card.appendChild(actions);
+        card.appendChild(content);
+
+        // Обработчики событий
+        card.addEventListener('click', e => {
+          if (e.target.classList.contains('delete-btn')) {
+            e.stopPropagation();
+            deleteProject(p.id);
+          } else if (e.target.classList.contains('share-btn')) {
+            e.stopPropagation();
+            fetch(`/project/share/${p.id}`)
+              .then(r => r.json())
+              .then(link => {
+                navigator.clipboard.writeText(link.slug);
+              })
+              .catch(() => alert('Не удалось получить ссылку'));
+          } else {
+            location.href = `/projects/${p.id}/edit`;
+          }
+        });
+
+        cont.appendChild(card);
+      });
+
+
+      document.getElementById('addProject').disabled = projects.length >= maxProjects;
+    }
+
+
+    async function deleteProject(id) {
+      if (!confirm('Удалить проект?')) return;
+      await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+      loadProfile();  // Загружаем обновлённый профиль
+    }
+
+    // Создание нового проекта
+    addProject.onclick = async () => {
+      const resp = await fetch('/api/projects', { method: 'POST' });
+      if (resp.redirected) {
+        location.href = resp.url;  // Перенаправление на страницу редактирования нового проекта
+      } else {
+        alert('Не удалось создать проект');
+      }
+    };
+
+    // Сохранение изменений пользователя
+    saveUser.onclick = async () => {
+      await fetch('/api/me', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.value,
+          username: username.value,
+          password: password.value
+        })
+      });
+      alert('Сохранено');
+      password.value = '';  // Очищаем поле пароля
+    };
+
+    // Загружаем профиль при инициализации страницы
+    loadProfile();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title id="pageTitle">Проект</title>
+  <link rel="stylesheet" href="/static/style/see_project.css">
+</head>
+
+<body>
+  <header>
+    <h1 id="projectName">Загрузка...</h1>
+    <p id="authorName">Автор: ...</p>
+  </header>
+  <div class="container">
+    <div class="cover" id="cover"></div>
+    <p class="description" id="projectDescription"></p>
+
+    <div class="block-list" id="blocksContainer"></div>
+
+    <div class="gallery" id="imagesContainer"></div>
+  </div>
+
+  <script>
+    async function loadProject() {
+      const pathParts = location.pathname.split('/');
+      const author = pathParts[2];
+      const project = decodeURIComponent(pathParts[3]);
+
+      const r = await fetch(`/api/get_project_data/${author}/${project}`);
+      if (!r.ok) {
+        document.getElementById('projectName').textContent = 'Проект не найден';
+        return;
+      }
+
+      const data = await r.json();
+
+      document.title = data.name;
+      document.getElementById('pageTitle').textContent = data.name;
+      document.getElementById('projectName').textContent = data.name;
+      document.getElementById('authorName').textContent = `Автор: ${author}`;
+      document.getElementById('projectDescription').textContent = data.description || 'Описание отсутствует';
+
+      if (data.cover) {
+        const cover = document.getElementById('cover');
+        const coverPath = data.cover.startsWith('/') ? data.cover : '/' + data.cover;
+
+        const encodedCoverPath = encodeURI(coverPath);
+        cover.style.backgroundImage = `url(${encodedCoverPath})`;
+        cover.style.display = 'flex';
+      }
+
+
+      const blocks = data.blocks || [];
+      const blockList = document.getElementById('blocksContainer');
+      blocks.forEach(b => {
+        const div = document.createElement('div');
+        div.className = 'block';
+        div.textContent = b;
+        blockList.appendChild(div);
+      });
+
+      const imagesObj = data.images || {};
+      const gallery = document.getElementById('imagesContainer');
+
+      Object.values(imagesObj).forEach(src => {
+        const img = document.createElement('img');
+        img.src = src.startsWith('/') ? src : '/' + src;
+        gallery.appendChild(img);
+      });
+    }
+
+    loadProject();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+*{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background-color:#f9f9f9;color:#1f1f1f;line-height:1.6;padding:2rem}
+    .container{max-width:800px;margin:0 auto}
+    .header{text-align:center;margin-bottom:2rem}
+    .header h1{font-size:2.5rem;font-weight:800;color:#333}
+    .header p{font-size:1.1rem;color:#555}
+    .section{background:#fff;border-radius:12px;padding:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,.05);margin-bottom:2rem}
+    .section h2{font-size:1.5rem;font-weight:600;margin-bottom:1rem;color:#222}
+    .form-group{margin-bottom:1.25rem}
+    label{display:block;margin-bottom:.5rem;font-weight:600}
+    input{width:100%;padding:.75rem;border:1px solid #ccc;border-radius:8px;font-size:1rem}
+    .cta{display:flex;justify-content:center;gap:12px;margin-top:2rem}
+    .btn{padding:.75rem 1.5rem;border-radius:8px;font-weight:600;cursor:pointer;border:none;transition:background .3s}
+    .btn-primary{background-color:#4f46e5;color:#fff}
+    .btn-primary:hover{background-color:#3730a3}
+    .btn-outline{background:transparent;color:#4f46e5;border:2px solid #4f46e5}
+    .btn-outline:hover{background:#eef2ff}
