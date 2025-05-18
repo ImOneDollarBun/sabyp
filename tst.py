@@ -12,10 +12,10 @@ project_id = 'b22a3568-113f-4d07-8bb7-7c43406ee155'
 upload_dir = f"{API.media_dir}/{project_id}/images/"
 
 # Пример содержимого файла
-with open('static/default-cover.jpg', 'rb') as file:
+with open('favicon.ico', 'rb') as file:
 
     # Создание объекта UploadFile вручную
-    fake_file = UploadFile(filename='default-cover.jpg', file=file)
+    fake_file = UploadFile(filename='favicon.ico', file=file)
 
     # Сохранение
     path = save_file(fake_file, user_id=user_id, folder=upload_dir)
