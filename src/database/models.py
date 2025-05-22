@@ -33,7 +33,7 @@ class ProjectsTable(Base):
     __tablename__ = 'projects'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False)
     description = Column(String)
     images = Column(JSONB, default=dict)
     blocks = Column(ARRAY(item_type=String))
