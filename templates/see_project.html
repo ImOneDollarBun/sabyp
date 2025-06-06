@@ -5,21 +5,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title id="pageTitle">Проект</title>
-  <link rel="stylesheet" href="/static/style/see_project.css">
+  <link rel="stylesheet" href="/static/style/see_project.css?v=1">
 </head>
 
 <body>
-  <header>
-    <h1 id="projectName">Загрузка...</h1>
-    <p id="authorName">Автор: ...</p>
-  </header>
+
   <div class="container">
-    <div class="cover" id="cover"></div>
-    <p class="description" id="projectDescription"></p>
+    <div class="card">
+      <div class="cover" id="cover"></div>
+      <h2 class="project-title" id="projectName">Загрузка...</h2>
+      <p class="author" id="authorName">Автор: ...</p>
+      <p class="description" id="projectDescription"></p>
 
-    <div class="block-list" id="blocksContainer"></div>
+      <div class="block-list" id="blocksContainer"></div>
+      <div class="gallery" id="imagesContainer"></div>
+    </div>
 
-    <div class="gallery" id="imagesContainer"></div>
   </div>
 
   <script>

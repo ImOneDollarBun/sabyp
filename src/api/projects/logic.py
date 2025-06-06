@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 from fastapi import APIRouter, Depends
@@ -96,10 +97,15 @@ async def update_project(
     # Извлекаем images словарь из form-data
     images_dict = json.loads(form_data.get("images", "{}"))
     upload_images = upload_dir + 'images/'
+
     for key in list(images_dict):
         file = form_data.get(key)
-        image_path = save_file(file, folder=upload_images, user_id=user.id)
-        images_dict[key] = image_path
+
+        if file:
+            image_path = save_file(file, folder=upload_images, user_id=user.id)
+            images_dict[key] = image_path
+        else:
+            pass
 
     update_project_data(
         project_id=project_id,
