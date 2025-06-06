@@ -1,7 +1,9 @@
 # created by virtualenv automatically
-venv/Lib
+venv/
 private_key.pem
 public_key.pem
 __pycache__/
 *.pyc
 .idea/
+tst.py
+media/projects/
