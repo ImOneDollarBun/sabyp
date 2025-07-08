@@ -38,8 +38,8 @@ async def edit_prj(request: Request, user: User = Depends(get_current_user)):
 @project_router.get('/project/share/{project_id}')
 async def share_link(project_id):
     slug = generate_share_link(project_id)
-    # return ShareLinkSchema(slug=f'https://geoto.site/projects/{slug.slug}')
-    return ShareLinkSchema(slug=f'http://127.0.0.1:5000/projects/{slug.slug}')
+    return ShareLinkSchema(slug=f'https://geoto.site/projects/{slug.slug}')
+    # return ShareLinkSchema(slug=f'http://127.0.0.1:5000/projects/{slug.slug}')
 
 
 @project_router.get('/projects/{username}/{project_name}')
