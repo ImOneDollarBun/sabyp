@@ -1,3 +1,4 @@
+[Demo](https://geoto.site)
 ## Платформа для быстрой презентации продукта
 ### Установка (```Linux``` & ```Windows```)
 1. Клонирование и переход в директорию
@@ -25,7 +26,7 @@ pip install -r requirements.txt
 ```
 5. Создание ключей безопасности JWT
 ```bash
-python src/utils/certs/genkeys.py
+python src/utils/certs/gen_keys.py
 ```
 6. Запуск приложения
 ####

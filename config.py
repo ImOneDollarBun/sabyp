@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-#FastApi
+# FastApi
 APP_PORT = os.getenv('APP_PORT')
 
 
@@ -12,8 +12,7 @@ class API:
     media_dir = 'media/projects'
 
 
-
-#Postgres
+# Postgres
 class Database:
     DB_USER = os.getenv('DB_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
@@ -33,4 +32,3 @@ class auth_jwt:
 class Redis:
     HOST = 'localhost'
     PORT = 6379
-
