@@ -5,5 +5,5 @@ public_key.pem
 __pycache__/
 *.pyc
 .idea/
-*tst.py
+tst.py
 media/projects/
